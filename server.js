@@ -34,7 +34,7 @@ connection.connect((err)=>{
 app.post('/api/register', (req, res) => {
     const { user_name, email, password } = req.body;
   
-    const sql = 'INSERT INTO user (user_name, email, password) VALUES (?, ?, ?)';
+    const sql = 'INSERT INTO users (user_name, email, password) VALUES (?, ?, ?)';
     const values = [user_name, email, password];
   
     connection.query(sql, values, (err, result) => {
@@ -58,7 +58,7 @@ app.post('/api/register', (req, res) => {
   
     try {
       // Retrieve the user record from the database
-      const query = "SELECT * FROM user WHERE email = ?";
+      const query = "SELECT * FROM users WHERE email = ?";
       connection.query(query, [email], (error, results) => {
         if (error) {
           console.error('Error during login:', error);
@@ -79,7 +79,8 @@ app.post('/api/register', (req, res) => {
         }
   
         // Return a success message
-        res.json({ message: 'Login successful.' });
+        //res.json({ message: 'Login successful.' });
+        res.send({user})
       });
     } catch (error) {
       console.error('Error during login:', error);
@@ -87,7 +88,33 @@ app.post('/api/register', (req, res) => {
     }
   });
   
+ // to get user data
 
+ app.get("/api/get/userdata/:userID" , (req , res)=>{
+          
+        const userID = req.params.userID ;
+
+       try{
+        connection.query("SELECT * FROM `users` WHERE user_id = ?" ,[userID], (err , result)=>{
+
+            if(err){
+                console.log("error in getting data", err);
+                return res.status(500).json({message : "error in fetching user data"})
+            }
+
+            res.send({result});
+
+        })
+
+
+       }
+       catch (err){
+        console.log("error in fetching user data", err);
+        res.status(500).json({message : "error in fetching user data"})
+
+       }
+
+ })
 
 
 
