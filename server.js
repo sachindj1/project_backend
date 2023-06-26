@@ -116,9 +116,91 @@ app.post('/api/register', (req, res) => {
 
  })
 
+   // to ge the list of all the subjects on userLanding page 
+
+ app.get("/api/get/subjects" , (req , res)=>{
+
+    try{
+        connection.query("SELECT * FROM subjects " , (err , result)=>{
+
+            if(err){
+                console.log("error in fetching data", err)
+
+                res.status(500).json({message : "error in fetching data"})
+            }
+
+            res.send({result});
+        })
+
+    }catch (err){
+        console.log("error in fetching dat")
+        res.status(400).json({ message : "server side error"})
+
+
+    }
+ })
+
+
+// get subject related questions based on subject id 
+
+app.get("/api/get/subject/:subjectIDD", (req, res) => {
+    const subId = req.params.subjectIDD;
+  
+    try {
+      connection.query(
+        "SELECT * FROM subjects WHERE subject_id = ?",
+        [subId],
+        (err, result) => {
+          if (err) {
+            console.log("Error in getting subject details", err);
+            res.status(500).json({ message: "Error in getting subject details" });
+          } else {
+            if (result.length === 0) {
+              res.status(404).json({ message: "Subject not found" });
+            } else {
+              res.json({ result });
+            }
+          }
+        }
+      );
+    } catch (err) {
+      console.log("Error in getting subject details", err);
+      res.status(400).json({ message: "Server-side error to get subject details" });
+    }
+  });
 
 
 
+  // getting questons based on subjectid 
+
+  
+  app.get("/api/get/subject/questions/:subjectIDD", (req, res) => {
+    const subId = req.params.subjectIDD;
+  
+    try {
+      connection.query(
+        "SELECT s.*, q.* FROM subjects s INNER JOIN questions q ON s.subject_id = q.subject_id WHERE s.subject_id = ?",
+        [subId],
+        (err, result) => {
+          if (err) {
+            console.log("Error in getting subject details", err);
+            res.status(500).json({ message: "Error in getting subject details" });
+          } else {
+            if (result.length === 0) {
+              res.status(404).json({ message: "Subject not found" });
+            } else {
+              res.json({ result });
+            }
+          }
+        }
+      );
+    } catch (err) {
+      console.log("Error in getting subject details", err);
+      res.status(400).json({ message: "Server-side error to get subject details" });
+    }
+  });
+  
+  
 
 
 
