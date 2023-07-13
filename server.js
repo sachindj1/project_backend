@@ -57,36 +57,54 @@ app.post('/api/register', (req, res) => {
     const { email, password } = req.body;
   
     try {
-      // Retrieve the user record from the database
-      const query = "SELECT * FROM users WHERE email = ?";
-      connection.query(query, [email], (error, results) => {
-        if (error) {
-          console.error('Error during login:', error);
-          return res.status(500).json({ message: 'An error occurred during login.' })
+      // Retrieve the user record from the users table
+      const userQuery = "SELECT * FROM users WHERE email = ?";
+      connection.query(userQuery, [email], (userError, userResults) => {
+        if (userError) {
+          console.error('Error during user login:', userError);
+          return res.status(500).json({ message: 'An error occurred during login.' });
         }
   
-        if (results.length === 0) {
-          // User not found
-          return res.status(401).json({ message: 'Invalid emaile or password.' });
+        if (userResults.length === 0) {
+          // User not found in the users table, check admin table
+          const adminQuery = "SELECT * FROM admin WHERE email = ?";
+          connection.query(adminQuery, [email], (adminError, adminResults) => {
+            if (adminError) {
+              console.error('Error during admin login:', adminError);
+              return res.status(500).json({ message: 'An error occurred during login.' });
+            }
+  
+            if (adminResults.length === 0) {
+              // User not found in the admin table as well
+              return res.status(401).json({ message: 'Invalid email or password.' });
+            }
+  
+            const admin = adminResults[0];
+            if (password !== admin.password) {
+              // Passwords don't match
+              return res.status(401).json({ message: 'Invalid email or password.' });
+            }
+  
+            // Return a success message for admin login
+            res.json({ admin });
+          });
+        } else {
+          const user = userResults[0];
+          if (password !== user.password) {
+            // Passwords don't match
+            return res.status(401).json({ message: 'Invalid email or password.' });
+          }
+  
+          // Return a success message for user login
+          res.json({ user });
         }
-  
-        const user = results[0];
-  
-        // Compare the provided password with the stored password
-        if (password !== user.password) {
-          // Passwords don't match
-          return res.status(401).json({ message: 'Invalid username or password.' });
-        }
-  
-        // Return a success message
-        //res.json({ message: 'Login successful.' });
-        res.send({user})
       });
     } catch (error) {
       console.error('Error during login:', error);
       res.status(500).json({ message: 'An error occurred during login.' });
     }
   });
+  
   
  // to get user data
 
