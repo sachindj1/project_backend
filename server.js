@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 
 
 
+
+
 const app = express();
 
 app.listen(5000 , ()=> {
@@ -219,6 +221,39 @@ app.get("/api/get/subject/:subjectIDD", (req, res) => {
   });
   
   //we made it ...!!! 
+  app.post("/api/questions/:subjectId", (req, res) => {
+    const subId = req.params.subjectId;
+    const { question_text, options, answer } = req.body;
+  
+    try {
+      const optionsJson = JSON.stringify(options);
+  
+      connection.query(
+        "INSERT INTO questions (question_text, options, answer, subject_id) VALUES (?, ?, ?, ?)",
+        [question_text, optionsJson, answer, subId],
+        (err, result) => {
+          if (err) {
+            console.log(err);
+            res.status(500).send("Error inserting data");
+          } else {
+            res.send("Data inserted successfully!");
+          }
+        }
+      );
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error");
+    }
+  });
+  
+  
+
+
+
+
+
+
+
 
 
 
